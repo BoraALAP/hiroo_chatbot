@@ -1,10 +1,10 @@
 import { ReactNode } from 'react';
-import Link from 'next/link';
+
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-blue-600 text-white p-4">
+      {/* <header className="bg-blue-600 text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold">Admin Dashboard</h1>
           <nav>
@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </ul>
           </nav>
         </div>
-      </header>
+      </header> */}
       
       <main className="flex-grow">
         {children}
