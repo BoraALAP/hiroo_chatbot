@@ -75,6 +75,14 @@ If you prefer to embed the chatbot directly into a specific page or section, you
 1. Add a div around the HTML Embed element
 2. Style the container as needed (add borders, shadows, etc.)
 
+## Vercel Deployment Configuration
+
+When deploying to Vercel, make sure to:
+
+1. Set the `NEXT_PUBLIC_ALLOWED_ORIGINS` environment variable with your Webflow site's domain(s)
+2. Configure other required environment variables for your chatbot (API keys, etc.)
+3. Deploy from the main branch of your repository
+
 ## Troubleshooting
 
 ### CORS Issues

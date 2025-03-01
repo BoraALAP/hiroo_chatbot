@@ -96,7 +96,9 @@
         chatWindow.style.display = 'flex';
         // Send message to iframe that chat is opened
         setTimeout(() => {
+          // Send both message types for compatibility with both implementations
           chatIframe.contentWindow.postMessage({ type: 'CHAT_OPENED', config }, '*');
+          chatIframe.contentWindow.postMessage({ type: 'CHATBOT_CONFIG', config }, '*');
         }, 500);
       } else {
         chatWindow.style.display = 'none';
@@ -126,6 +128,7 @@
       open: function() {
         chatWindow.style.display = 'flex';
         chatIframe.contentWindow.postMessage({ type: 'CHAT_OPENED', config }, '*');
+        chatIframe.contentWindow.postMessage({ type: 'CHATBOT_CONFIG', config }, '*');
       },
       close: function() {
         chatWindow.style.display = 'none';
