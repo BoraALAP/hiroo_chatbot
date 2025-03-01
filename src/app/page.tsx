@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Chat from '@/components/Chat';
 
 export default function Home() {
   return (
@@ -96,6 +97,42 @@ export default function Home() {
           Go to nextjs.org →
         </a>
       </footer>
+
+      <div className="relative flex place-items-center">
+        <h1 className="text-4xl font-bold">Welcome to Our Help Center</h1>
+      </div>
+
+      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-3 lg:text-left">
+        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
+          <h2 className="mb-3 text-2xl font-semibold">
+            Ask Questions
+          </h2>
+          <p className="m-0 max-w-[30ch] text-sm opacity-50">
+            Use our chatbot to get instant answers about our products.
+          </p>
+        </div>
+
+        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
+          <h2 className="mb-3 text-2xl font-semibold">
+            Get Support
+          </h2>
+          <p className="m-0 max-w-[30ch] text-sm opacity-50">
+            Our AI-powered assistant is available 24/7 to help you.
+          </p>
+        </div>
+
+        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
+          <h2 className="mb-3 text-2xl font-semibold">
+            Find Solutions
+          </h2>
+          <p className="m-0 max-w-[30ch] text-sm opacity-50">
+            Get accurate information about our products and services.
+          </p>
+        </div>
+      </div>
+
+      {/* Add the Chat component */}
+      <Chat />
     </div>
   );
 }
