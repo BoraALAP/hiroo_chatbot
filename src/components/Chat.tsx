@@ -19,22 +19,16 @@ type Message = {
 
 interface ChatProps {
   initialGreeting?: string;
-  chatTitle?: string;
-  chatSubtitle?: string;
 }
 
 export default function Chat({
-  initialGreeting = "How can I help you today?",
-  chatTitle = "Product Support",
-  chatSubtitle = "Ask me anything about our product"
+  initialGreeting = "How can I help you today?"
 }: ChatProps = {}) {
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatChain, setChatChain] = useState<ChatChain | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change
@@ -169,92 +163,42 @@ export default function Chat({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      {/* Chat toggle button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300"
-      >
-        {isOpen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
-        )}
-      </button>
-
-      {/* Chat window */}
-      {isOpen && (
-        <div 
-          className={`absolute bottom-16 right-0 bg-white rounded-lg shadow-xl overflow-hidden flex flex-col ${
-            isExpanded 
-              ? 'fixed top-4 left-4 right-4 bottom-16 w-auto h-auto' 
-              : 'w-96 sm:w-120 h-120'
-          }`}
-        >
-          {/* Chat header */}
-          <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-            <div>
-              <h3 className="font-medium">{chatTitle}</h3>
-              <p className="text-sm opacity-75">{chatSubtitle}</p>
-            </div>
-            <button 
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-white hover:bg-blue-700 p-2 rounded-full transition-colors"
-              aria-label={isExpanded ? "Minimize chat" : "Expand chat"}
-            >
-              {isExpanded ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 011.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 011.414-1.414L15 13.586V12a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-              )}
-            </button>
-          </div>
-          
-          {/* Error message */}
-          {error && (
-            <div className="p-4 bg-red-100 text-red-800 text-sm">
-              <p className="font-bold">Error:</p>
-              <p>{error}</p>
-            </div>
-          )}
-          
-          {/* Chat messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-4">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-800 mt-4">
-                <p>{initialGreeting}</p>
-              </div>
-            ) : (
-              messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))
-            )}
-            {isLoading && (
-              <div className="flex justify-center">
-                <div className="animate-pulse text-gray-800">Thinking...</div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          
-          {/* Chat input */}
-          <ChatInput
-            input={input}
-            handleInputChange={handleInputChange}
-            handleSubmit={handleSubmit}
-            isLoading={isLoading}
-            isExtended={isExpanded}
-          />
+    <div className="w-full h-full flex flex-col bg-white rounded-lg overflow-hidden">
+      {/* Error message */}
+      {error && (
+        <div className="p-4 bg-red-100 text-red-800 text-sm">
+          <p className="font-bold">Error:</p>
+          <p>{error}</p>
         </div>
       )}
+      
+      {/* Chat messages */}
+      <div className="flex-1 p-4 overflow-y-auto space-y-4">
+        {messages.length === 0 ? (
+          <div className="text-center text-gray-800 mt-4">
+            <p>{initialGreeting}</p>
+          </div>
+        ) : (
+          messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))
+        )}
+        {isLoading && (
+          <div className="flex justify-center">
+            <div className="animate-pulse text-gray-800">Thinking...</div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+      
+      {/* Chat input */}
+      <ChatInput
+        input={input}
+        handleInputChange={handleInputChange}
+        handleSubmit={handleSubmit}
+        isLoading={isLoading}
+        
+      />
     </div>
   );
 } 
