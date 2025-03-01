@@ -86,7 +86,7 @@
     chatIframe.style.width = '100%';
     chatIframe.style.height = 'calc(100% - 50px)';
     chatIframe.style.border = 'none';
-    chatIframe.src = 'https://your-chatbot.vercel.app/chat-embed';
+    chatIframe.src = 'https://hiroo-chatbot.vercel.app/chat-embed';
     chatIframe.allow = 'microphone';
     chatWindow.appendChild(chatIframe);
     
@@ -114,7 +114,7 @@
     // Handle messages from iframe
     window.addEventListener('message', function(event) {
       // Verify origin for security
-      if (event.origin !== 'https://your-chatbot.vercel.app') return;
+      if (event.origin !== 'https://hiroo-chatbot.vercel.app') return;
       
       const { type, height } = event.data;
       
