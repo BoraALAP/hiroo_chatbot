@@ -22,6 +22,19 @@ export default function Chat({
   const [lastQuestionId, setLastQuestionId] = useState<number | null>(null);
   const [orchestrator, setOrchestrator] = useState<ReturnType<typeof createOrchestrator> | null>(null);
 
+  // Add initial greeting message when component mounts
+  useEffect(() => {
+    if (initialGreeting && messages.length === 0) {
+      setMessages([
+        {
+          id: 'greeting',
+          role: 'assistant',
+          content: initialGreeting
+        }
+      ]);
+    }
+  }, [initialGreeting]);
+
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -112,10 +125,10 @@ export default function Chat({
   };
 
   return (
-    <div className="w-full h-[100vh] flex flex-col bg-black overflow-hidden">
+    <div className="w-full h-[100vh] flex flex-col bg-white overflow-hidden">
       {/* Error message */}
       {error && (
-        <div className="p-4 bg-red-900/50 text-red-300 text-sm border border-red-800">
+        <div className="p-4 bg-red-100 text-red-700 text-sm border border-red-200">
           <div className="flex items-start">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -130,16 +143,10 @@ export default function Chat({
       )}
       
       {/* Chat messages */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4 chat-messages-container">
-        {messages.length === 0 ? (
-          <div className="text-center text-gray-300 mt-4">
-            <p>{initialGreeting}</p>
-          </div>
-        ) : (
-          messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))
-        )}
+      <div className="flex-1 p-4 overflow-y-auto space-y-4 chat-messages-container flex flex-col justify-end">
+        {messages.map((message) => (
+          <ChatMessage key={message.id} message={message} />
+        ))}
         <div ref={messagesEndRef} />
       </div>
       

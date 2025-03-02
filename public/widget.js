@@ -303,39 +303,7 @@
       config.isExpanded = !config.isExpanded;
     });
     
-    // // Make header draggable to move the chat window
-    // let isDragging = false;
-    // let dragOffsetX, dragOffsetY;
-    
-    // chatHeader.addEventListener('mousedown', function(e) {
-    //   isDragging = true;
-    //   dragOffsetX = e.clientX - chatWindow.getBoundingClientRect().left;
-    //   dragOffsetY = e.clientY - chatWindow.getBoundingClientRect().top;
-    //   chatWindow.style.transition = 'none'; // Disable transitions while dragging
-    // });
-    
-    // document.addEventListener('mousemove', function(e) {
-    //   if (isDragging) {
-    //     const x = e.clientX - dragOffsetX;
-    //     const y = e.clientY - dragOffsetY;
-        
-    //     // Keep the window within viewport bounds
-    //     const maxX = window.innerWidth - chatWindow.offsetWidth;
-    //     const maxY = window.innerHeight - chatWindow.offsetHeight;
-        
-    //     chatWindow.style.right = 'auto';
-    //     chatWindow.style.bottom = 'auto';
-    //     chatWindow.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
-    //     chatWindow.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
-    //   }
-    // });
-    
-    // document.addEventListener('mouseup', function() {
-    //   if (isDragging) {
-    //     isDragging = false;
-    //     chatWindow.style.transition = 'all 0.3s ease'; // Re-enable transitions
-    //   }
-    // });
+ 
     
     // Handle messages from iframe
     window.addEventListener('message', function(event) {

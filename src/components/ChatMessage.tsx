@@ -16,12 +16,12 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   const isLoading = message.content === '...';
   
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
         className={`max-w-[80%] rounded-lg px-4 py-2 ${
           isUser
-            ? 'bg-[#00015E] text-white'
-            : 'bg-gray-800 text-gray-200 border border-gray-700'
+            ? 'bg-blue-200'
+            : 'bg-gray-100 text-gray-800 border border-gray-200'
         }`}
       >
         {isLoading ? (
@@ -38,8 +38,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               components={{
                 ul: (props) => <ul className="list-disc" {...props} />,
                 ol: (props) => <ol className="list-decimal" {...props} />,
-                li: (props) => <li className="marker:text-blue-400" {...props} />,
-                p: (props) => <p className="mb-2 last:mb-0" {...props} />,
+                li: (props) => <li className="marker:text-blue-500" {...props} />,
+                p: (props) => <p className="mb-2 font-medium last:mb-0" {...props} />,
               }}
             >
               {message.content}

@@ -10,13 +10,6 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   color: var(--foreground);
   background: var(--background);
@@ -54,7 +47,7 @@ body {
   }
   
   & li::marker {
-    color: #60a5fa;
+    color: #3b82f6;
   }
   
   & li:last-child {
@@ -63,38 +56,40 @@ body {
   
   /* Link styling */
   & a {
-    color: #3b82f6;
+    color: #2563eb;
     text-decoration: underline;
     text-underline-offset: 2px;
     transition: color 0.2s;
   }
   
   & a:hover {
-    color: #60a5fa;
+    color: #3b82f6;
   }
   
   /* Code block styling */
   & code {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.05);
     padding: 0.2em 0.4em;
     border-radius: 3px;
     font-family: monospace;
     font-size: 0.9em;
+    color: #374151;
   }
   
   & pre {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.05);
     padding: 1rem;
     border-radius: 6px;
     overflow-x: auto;
     margin: 0.5rem 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
   
   & pre code {
     background-color: transparent;
     padding: 0;
     border-radius: 0;
-    color: inherit;
+    color: #374151;
   }
   
   /* Heading styling */
@@ -103,6 +98,7 @@ body {
     margin-bottom: 0.5rem;
     font-weight: 600;
     line-height: 1.25;
+    color: #111827;
   }
   
   & h1 {
@@ -121,6 +117,7 @@ body {
   & p {
     margin-bottom: 0.5rem;
     line-height: 1.5;
+    color: #374151;
   }
   
   & p:last-child {

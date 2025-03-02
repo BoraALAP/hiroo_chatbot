@@ -25,19 +25,39 @@ export default function ChatInput({
     }
   }, [input]);
 
+  // Focus textarea on component mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
   // Handle Enter key to submit
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
       e.preventDefault();
       if (input.trim()) {
         handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
+        // Refocus the textarea after submission
+        setTimeout(() => {
+          textareaRef.current?.focus();
+        }, 0);
       }
     }
   };
 
+  // Custom submit handler to maintain focus
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    handleSubmit(e);
+    // Refocus the textarea after submission
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 0);
+  };
+
   return (
-    <div className="border-t border-gray-700 p-4 bg-gray-900">
-      <form onSubmit={handleSubmit} className="flex items-end">
+    <div className="border-t border-gray-200 p-4 bg-gray-50">
+      <form onSubmit={onSubmit} className="flex items-start">
         <div className="flex-grow relative">
           <textarea
             ref={textareaRef}
@@ -45,7 +65,7 @@ export default function ChatInput({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full p-3 pr-10 bg-gray-800 text-white rounded-lg resize-none overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[50px] max-h-[200px]"
+            className="w-full p-3 pr-10 bg-white text-gray-800 border border-gray-300 rounded-lg  overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[50px] max-h-[200px]"
             rows={1}
             disabled={isLoading}
           />
@@ -60,7 +80,7 @@ export default function ChatInput({
           disabled={isLoading || !input.trim()}
           className={`ml-2 p-3 rounded-lg ${
             isLoading || !input.trim()
-              ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
               : 'bg-blue-600 text-white hover:bg-blue-700'
           } transition-colors duration-200`}
         >
