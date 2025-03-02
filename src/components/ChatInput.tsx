@@ -56,7 +56,7 @@ export default function ChatInput({
   };
 
   return (
-    <div className="border-t border-gray-200 p-4 bg-gray-50">
+    <div className="border-t border-gray-200 p-4 bg-gray-50 fixed bottom-0 w-full  ">
       <form onSubmit={onSubmit} className="flex items-start">
         <div className="flex-grow relative">
           <textarea
@@ -65,7 +65,7 @@ export default function ChatInput({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full p-3 pr-10 bg-white text-gray-800 border border-gray-300 rounded-lg  overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[50px] max-h-[200px]"
+            className="w-full p-3 pr-10 bg-white text-gray-800 border border-gray-300 resize-none rounded-lg  overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[50px] max-h-[200px]"
             rows={1}
             disabled={isLoading}
           />

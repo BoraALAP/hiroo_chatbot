@@ -33,7 +33,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             </div>
           </div>
         ) : (
-          <div className="whitespace-normal chat-message-content">
+          <div className="whitespace-normal chat-message-content ">
             <ReactMarkdown
               components={{
                 ul: (props) => <ul className="list-disc" {...props} />,

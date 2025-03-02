@@ -62,7 +62,7 @@
     chatWindow.style.backgroundColor = '#fff';
     chatWindow.style.borderRadius = '10px';
     chatWindow.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
-    chatWindow.style.overflow = 'hidden';
+    chatWindow.style.overflowY = 'auto';
     chatWindow.style.display = 'none';
     chatWindow.style.flexDirection = 'column';
     widgetContainer.appendChild(chatWindow);

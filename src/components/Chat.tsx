@@ -101,6 +101,7 @@ export default function Chat({
       if (!orchestrator) {
         throw new Error("Chat services not initialized. Please refresh the page and try again.");
       }
+      console.log(messages);
       
       // Process the message using the orchestrator
       const result = await orchestrator.processMessage(
@@ -125,7 +126,7 @@ export default function Chat({
   };
 
   return (
-    <div className="w-full h-[100vh] flex flex-col bg-white overflow-hidden">
+    <div className="w-full h-full  flex flex-col bg-white  pb-20">
       {/* Error message */}
       {error && (
         <div className="p-4 bg-red-100 text-red-700 text-sm border border-red-200">
@@ -143,7 +144,7 @@ export default function Chat({
       )}
       
       {/* Chat messages */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4 chat-messages-container flex flex-col justify-end">
+      <div className="flex-1 p-4 h-full overflow-y-auto space-y-4  ">
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
