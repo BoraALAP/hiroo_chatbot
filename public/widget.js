@@ -3,7 +3,7 @@
   const defaultConfig = {
     position: 'bottom-right',
     primaryColor: '#00015E',
-    greeting: 'Hello! How can I help you today3?',
+    greeting: 'How can I help you today? I\'m here to assist you with any questions you have.',
     title: 'Hiroo Chat Support',
     width: '350px',
     height: '500px',
