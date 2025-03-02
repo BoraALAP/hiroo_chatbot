@@ -66,7 +66,7 @@ export const createKnowledgeBase = () => {
    */
   const search = async (
     question: string,
-    similarityThreshold: number = 0.5,
+    similarityThreshold: number = 0.7,
     maxResults: number = 5
   ): Promise<string | null> => {
     if (!initialized || !vectorStore) {

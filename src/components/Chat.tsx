@@ -130,7 +130,7 @@ export default function Chat({
       )}
       
       {/* Chat messages */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4">
+      <div className="flex-1 p-4 overflow-y-auto space-y-4 chat-messages-container">
         {messages.length === 0 ? (
           <div className="text-center text-gray-300 mt-4">
             <p>{initialGreeting}</p>

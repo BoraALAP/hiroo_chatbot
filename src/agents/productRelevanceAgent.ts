@@ -1,6 +1,5 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { LLMChain } from "langchain/chains";
 
 /**
  * Creates a product relevance checker that determines if a question is related to a product
@@ -20,27 +19,39 @@ export const createProductRelevanceChecker = (
   });
 
   // Create a prompt template for product relevance checking
-  const template = `You are an AI assistant that determines if a question is related to a product or service.
-Your task is to analyze the question and determine if it is asking about:
-- A product or service (like career pages, job boards, etc.)
-- Features or functionality (like customization, design, settings, etc.)
-- Pricing or plans
-- Usage or implementation
-- Technical support
+  const template = `You are an AI assistant that determines if a question is related to the Hiroo product or service.
 
-Consider questions about career pages, job postings, company profiles, and related features as product-related.
+ABOUT HIROO:
+Hiroo is a platform that helps companies create career pages, job boards, and manage job postings and applications.
+
+YOUR TASK:
+Analyze the question and determine if it is asking about:
+- Hiroo as a product or service
+- Features or functionality of Hiroo
+- Pricing or plans for Hiroo
+- Usage or implementation of Hiroo
+- Technical support for Hiroo
+- Career pages, job boards, or recruitment tools (which are relevant to Hiroo's domain)
+
+GUIDELINES:
+- Questions about career pages, job postings, company profiles, and related features are considered relevant if they could reasonably be answered in the context of Hiroo.
+- Questions about general recruitment, hiring processes, or job seeking may be relevant if they relate to Hiroo's functionality.
+- Questions that are clearly outside Hiroo's domain should be classified as not relevant.
+
+EXAMPLES OF NON-RELEVANT QUESTIONS:
+- Philosophical questions (e.g., "What is the meaning of life?")
+- General knowledge questions unrelated to recruitment or Hiroo (e.g., "How tall is Mount Everest?")
+- Personal advice unrelated to careers or Hiroo (e.g., "Should I break up with my partner?")
+- Questions about unrelated products or services
 
 Question: {question}
 
-Is this question related to a product or service? Answer with only "yes" or "no".`;
+Is this question related to Hiroo or its domain of career pages and recruitment? Answer with only "yes" or "no".`;
 
   const promptTemplate = PromptTemplate.fromTemplate(template);
 
   // Create the chain
-  const chain = new LLMChain({
-    llm: model,
-    prompt: promptTemplate,
-  });
+  const chain = promptTemplate.pipe(model);
 
   /**
    * Checks if a question is related to a product
@@ -51,7 +62,7 @@ Is this question related to a product or service? Answer with only "yes" or "no"
     try {
       console.log("Checking if question is product-related:", question);
       
-      const response = await chain.call({
+      const response = await chain.invoke({
         question,
       });
       

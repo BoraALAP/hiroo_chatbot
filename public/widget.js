@@ -155,6 +155,102 @@
     chatIframe.allow = 'microphone';
     chatWindow.appendChild(chatIframe);
     
+    // Add custom CSS for markdown styling to the iframe once it loads
+    chatIframe.addEventListener('load', function() {
+      try {
+        const iframeDocument = chatIframe.contentDocument || chatIframe.contentWindow.document;
+        const styleElement = iframeDocument.createElement('style');
+        styleElement.textContent = `
+          /* Chat message markdown styling */
+          .chat-message-content {
+            white-space: normal;
+          }
+          
+          .chat-message-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin: 0.25rem 0;
+            list-style-position: outside;
+          }
+          
+          .chat-message-content ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin: 0.25rem 0;
+            list-style-position: outside;
+          }
+          
+          .chat-message-content li {
+            margin-bottom: 0.125rem;
+            line-height: 1.4;
+            display: list-item;
+          }
+          
+          .chat-message-content li::marker {
+            color: #60a5fa;
+          }
+          
+          .chat-message-content li:last-child {
+            margin-bottom: 0;
+          }
+          
+          .chat-message-content a {
+            color: #3b82f6;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+          }
+          
+          .chat-message-content a:hover {
+            color: #60a5fa;
+          }
+          
+          .chat-message-content code {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9em;
+          }
+          
+          .chat-message-content pre {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+          }
+          
+          .chat-message-content pre code {
+            background-color: transparent;
+            padding: 0;
+          }
+          
+          .chat-message-content h1, 
+          .chat-message-content h2, 
+          .chat-message-content h3, 
+          .chat-message-content h4, 
+          .chat-message-content h5, 
+          .chat-message-content h6 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+          }
+          
+          .chat-message-content p {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+          }
+          
+          .chat-message-content p:last-child {
+            margin-bottom: 0;
+          }
+        `;
+        iframeDocument.head.appendChild(styleElement);
+      } catch (error) {
+        console.error('Error injecting styles into iframe:', error);
+      }
+    });
+    
     // Toggle chat window when button is clicked
     chatButton.addEventListener('click', function() {
       if (chatWindow.style.display === 'none') {

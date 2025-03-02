@@ -33,8 +33,17 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             </div>
           </div>
         ) : (
-          <div className="whitespace-pre-wrap">
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+          <div className="whitespace-normal chat-message-content">
+            <ReactMarkdown
+              components={{
+                ul: (props) => <ul className="list-disc" {...props} />,
+                ol: (props) => <ol className="list-decimal" {...props} />,
+                li: (props) => <li className="marker:text-blue-400" {...props} />,
+                p: (props) => <p className="mb-2 last:mb-0" {...props} />,
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
           </div>
         )}
       </div>

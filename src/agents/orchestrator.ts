@@ -150,7 +150,8 @@ export const createOrchestrator = () => {
       const fallbackResponse = await state.generateResponse(
         userMessage,
         null,
-        historyText
+        historyText,
+        isProductRelated
       );
       
       return {
@@ -236,12 +237,36 @@ export const createOrchestrator = () => {
           lastQuestionId: null,
         };
       } else {
-        // If no answer in knowledge base, continue with normal flow
-        // but reset the email waiting state
+        // If no answer in knowledge base, check if product-related
+        const isProductRelated = await state.checkProductRelevance(simplifiedQuestion);
+        
+        // If product-related, collect email
+        if (isProductRelated) {
+          // Add to unanswered questions
+          const questionId = await state.emailCollector.addUnansweredQuestion(
+            simplifiedQuestion,
+            userInput
+          );
+          
+          if (questionId) {
+            const emailRequestMessage = state.emailCollector.generateEmailRequestMessage(
+              "I don't have specific information about that yet. Our team is constantly updating our knowledge base."
+            );
+            
+            return {
+              response: createAssistantMessage(emailRequestMessage),
+              waitingForEmail: true,
+              lastQuestionId: questionId,
+            };
+          }
+        }
+        
+        // If not product-related or error adding question, generate fallback
         const fallbackResponse = await state.generateResponse(
           userInput,
           null,
-          '' // No history for this case
+          '', // No history for this case
+          isProductRelated
         );
         
         return {
