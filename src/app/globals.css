@@ -23,5 +23,14 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Add these animation delay classes at the end of the file */
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
 
 

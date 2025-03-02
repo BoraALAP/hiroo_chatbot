@@ -1,100 +1,70 @@
 "use client";
 
 import { useState, useEffect, FormEvent, useRef } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { OpenAIEmbeddings } from '@langchain/openai';
-import { SupabaseVectorStore } from '@langchain/community/vectorstores/supabase';
-import { ChatOpenAI } from '@langchain/openai';
 import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
-import { ChatChain, createChatChain } from '@/utils/chatChainBuilder';
-import { HumanMessage, AIMessage } from '@langchain/core/messages';
-
-// Define a message type
-type Message = {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-};
+import { Message, createUserMessage } from '@/utils/chatMessageUtils';
+import { createOrchestrator } from '@/agents/orchestrator';
 
 interface ChatProps {
   initialGreeting?: string;
 }
 
 export default function Chat({
-  initialGreeting = "How can I help you today?"
+  initialGreeting = "How can I help you today? I'm here to assist you with any questions you have."
 }: ChatProps = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [chatChain, setChatChain] = useState<ChatChain | null>(null);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [waitingForEmail, setWaitingForEmail] = useState(false);
+  const [lastQuestionId, setLastQuestionId] = useState<number | null>(null);
+  const [orchestrator, setOrchestrator] = useState<ReturnType<typeof createOrchestrator> | null>(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  // Initialize Supabase and LangChain components
+  // Initialize orchestrator
   useEffect(() => {
-    const initializeServices = async () => {
+    const initialize = async () => {
       try {
-        // Check for OpenAI API key
+        // Check for environment variables
         const openAIApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-        if (!openAIApiKey) {
-          setError("Missing OpenAI API key. Please set the NEXT_PUBLIC_OPENAI_API_KEY environment variable.");
-          console.error("Missing OpenAI API key");
-          return;
-        }
-
-        // Initialize Supabase client
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        const modelName = process.env.NEXT_PUBLIC_AI_MODEL || 'gpt-4-turbo';
+        const embeddingsModel = process.env.NEXT_PUBLIC_EMBEDDINGS_MODEL || 'text-embedding-3-small';
         
-        if (!supabaseUrl || !supabaseKey) {
-          setError("Missing Supabase credentials. Please set the NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.");
-          console.error('Missing Supabase environment variables');
+        if (!openAIApiKey || !supabaseUrl || !supabaseKey) {
+          setError("Missing environment variables. Please check your configuration.");
           return;
         }
         
-        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+        // Create and initialize orchestrator
+        const newOrchestrator = createOrchestrator();
+        const initialized = await newOrchestrator.initialize(
+          openAIApiKey,
+          supabaseUrl,
+          supabaseKey,
+          modelName,
+          embeddingsModel
+        );
         
-        // Initialize OpenAI embeddings
-        const embeddings = new OpenAIEmbeddings({
-          openAIApiKey: openAIApiKey,
-          modelName: process.env.NEXT_PUBLIC_EMBEDDINGS_MODEL || 'text-embedding-3-small',
-        });
-        
-        // Initialize Supabase vector store
-        const vectorStore = new SupabaseVectorStore(embeddings, {
-          client: supabaseClient,
-          tableName: 'documents',
-          queryName: 'match_documents',
-        });
-        
-        // Initialize chat model
-        const llm = new ChatOpenAI({
-          openAIApiKey: openAIApiKey,
-          modelName: process.env.NEXT_PUBLIC_AI_MODEL || 'gpt-4-turbo',
-          temperature: 0.2,
-        });
-        
-        // Create the chat chain using our utility function
-        const chain = createChatChain(llm, vectorStore);
-        
-        setChatChain(chain);
+        if (initialized) {
+          setOrchestrator(newOrchestrator);
+        } else {
+          setError("Failed to initialize chat services. Please check your configuration.");
+        }
       } catch (err) {
-        console.error('Error initializing services:', err);
+        console.error('Error initializing orchestrator:', err);
         setError("Failed to initialize chat services. Please check your configuration.");
       }
     };
     
-    initializeServices();
+    initialize();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -103,90 +73,72 @@ export default function Chat({
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    if (!input.trim() || !chatChain) return;
-    
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input.trim(),
-    };
-    
-    // Update messages state with the new user message
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    if (!input.trim()) return;
+
+    const userMessage = input.trim();
     setInput('');
+    setError(null); // Clear any previous errors
+
+    // Add user message to chat
+    const userMessageObj = createUserMessage(userMessage);
+    setMessages((prevMessages) => [...prevMessages, userMessageObj]);
     setIsLoading(true);
-    
+
     try {
-      // Convert messages to LangChain format for chat history
-      // Only include previous messages, not the current user message
-      const previousMessages = messages.map(message => {
-        if (message.role === 'user') {
-          return new HumanMessage(message.content);
-        } else {
-          return new AIMessage(message.content);
-        }
-      });
+      if (!orchestrator) {
+        throw new Error("Chat services not initialized. Please refresh the page and try again.");
+      }
       
-      console.log("Sending chat history with", previousMessages.length, "messages");
+      // Process the message using the orchestrator
+      const result = await orchestrator.processMessage(
+        userMessage,
+        messages,
+        waitingForEmail,
+        lastQuestionId
+      );
       
-      // Get response from LangChain with chat history
-      const response = await chatChain.invoke({ 
-        question: userMessage.content,
-        chatHistory: previousMessages
-      });
+      // Update state based on orchestrator response
+      setWaitingForEmail(result.waitingForEmail);
+      setLastQuestionId(result.lastQuestionId);
       
-      // Add assistant message
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response,
-      };
-      
-      setMessages([...updatedMessages, assistantMessage]);
+      // Add assistant response to chat
+      setMessages((prevMessages) => [...prevMessages, result.response]);
     } catch (error) {
-      console.error('Error getting response:', error);
-      
-      // Add error message
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: "I'm sorry, I encountered an error while processing your request. Please try again later.",
-      };
-      
-      setMessages([...updatedMessages, errorMessage]);
+      console.error('Error processing message:', error);
+      setError((error as Error).message || 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-white rounded-lg overflow-hidden">
+    <div className="w-full h-[100vh] flex flex-col bg-black overflow-hidden">
       {/* Error message */}
       {error && (
-        <div className="p-4 bg-red-100 text-red-800 text-sm">
-          <p className="font-bold">Error:</p>
-          <p>{error}</p>
+        <div className="p-4 bg-red-900/50 text-red-300 text-sm border border-red-800">
+          <div className="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <p className="font-bold">Something went wrong</p>
+              <p className="mt-1">{error}</p>
+              <p className="mt-2 text-xs">Please try again or refresh the page if the problem persists.</p>
+            </div>
+          </div>
         </div>
       )}
       
       {/* Chat messages */}
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-800 mt-4">
+          <div className="text-center text-gray-300 mt-4">
             <p>{initialGreeting}</p>
           </div>
         ) : (
           messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
           ))
-        )}
-        {isLoading && (
-          <div className="flex justify-center">
-            <div className="animate-pulse text-gray-800">Thinking...</div>
-          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -197,7 +149,7 @@ export default function Chat({
         handleInputChange={handleInputChange}
         handleSubmit={handleSubmit}
         isLoading={isLoading}
-        
+        placeholder={waitingForEmail ? "Enter your email address..." : "Type your message..."}
       />
     </div>
   );

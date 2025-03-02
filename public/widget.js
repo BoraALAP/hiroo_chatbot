@@ -3,8 +3,8 @@
   const defaultConfig = {
     position: 'bottom-right',
     primaryColor: '#00015E',
-    greeting: 'Hello! How can I help you today?',
-    title: 'Chat Support',
+    greeting: 'Hello! How can I help you today3?',
+    title: 'Hiroo Chat Support',
     width: '350px',
     height: '500px',
     buttonIcon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

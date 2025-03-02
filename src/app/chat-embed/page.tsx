@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Chat from '@/components/Chat';
 
 export default function ChatEmbed() {
-  const [greeting, setGreeting] = useState("How can I help you today?");
+  const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
     // Listen for messages from parent window

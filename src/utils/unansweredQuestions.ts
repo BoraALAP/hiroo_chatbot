@@ -14,6 +14,8 @@ export interface UnansweredQuestion {
   user_id?: string;
   created_at: string;
   updated_at: string;
+  email?: string;
+  answer_sent: boolean;
 }
 
 export interface ReasonablenessAssessment {
@@ -90,12 +92,92 @@ export function createQuestionReasonablenessChain(llm: ChatOpenAI) {
 }
 
 /**
+ * Updates an unanswered question with user email
+ */
+export async function updateQuestionWithEmail(
+  questionId: number,
+  email: string
+): Promise<boolean> {
+  try {
+    // Initialize Supabase client
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase environment variables');
+      return false;
+    }
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    
+    // Update the question with email
+    const { error } = await supabaseClient
+      .from('unanswered_questions')
+      .update({
+        email,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', questionId);
+    
+    if (error) {
+      console.error('Error updating question with email:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in updateQuestionWithEmail:', error);
+    return false;
+  }
+}
+
+/**
+ * Marks an unanswered question as having been answered
+ */
+export async function markQuestionAnswerSent(
+  questionId: number
+): Promise<boolean> {
+  try {
+    // Initialize Supabase client
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase environment variables');
+      return false;
+    }
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    
+    // Update the question as answered
+    const { error } = await supabaseClient
+      .from('unanswered_questions')
+      .update({
+        answer_sent: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', questionId);
+    
+    if (error) {
+      console.error('Error marking question as answered:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in markQuestionAnswerSent:', error);
+    return false;
+  }
+}
+
+/**
  * Adds an unanswered question to the database
  */
 export async function addUnansweredQuestion(
   question: string,
   processedQuestion?: string,
-  userId?: string
+  userId?: string,
+  email?: string
 ): Promise<number | null> {
   try {
     // Initialize Supabase client
@@ -117,7 +199,9 @@ export async function addUnansweredQuestion(
           question,
           processed_question: processedQuestion,
           user_id: userId,
-          status: 'pending'
+          status: 'pending',
+          email,
+          answer_sent: false
         }
       ])
       .select('id');

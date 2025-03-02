@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { UnansweredQuestion, markQuestionAddedToKB } from '@/utils/unansweredQuestions';
+import { UnansweredQuestion, markQuestionAddedToKB, markQuestionAnswerSent } from '@/utils/unansweredQuestions';
 import Link from 'next/link';
 import { 
   ArrowLeftIcon, 
   CheckCircleIcon, 
   ExclamationCircleIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  EnvelopeIcon
 } from '@heroicons/react/24/outline';
 
 export default function UnansweredQuestionsPage() {
@@ -18,6 +19,7 @@ export default function UnansweredQuestionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [emailFilter, setEmailFilter] = useState<string>('all');
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -58,7 +60,7 @@ export default function UnansweredQuestionsPage() {
   }, []);
 
   useEffect(() => {
-    // Filter questions based on search query and status filter
+    // Filter questions based on search query, status filter, and email filter
     let filtered = [...questions];
     
     if (searchQuery) {
@@ -71,8 +73,20 @@ export default function UnansweredQuestionsPage() {
       filtered = filtered.filter(q => q.status === statusFilter);
     }
     
+    if (emailFilter !== 'all') {
+      if (emailFilter === 'with_email') {
+        filtered = filtered.filter(q => q.email && q.email.trim() !== '');
+      } else if (emailFilter === 'without_email') {
+        filtered = filtered.filter(q => !q.email || q.email.trim() === '');
+      } else if (emailFilter === 'answer_sent') {
+        filtered = filtered.filter(q => q.answer_sent === true);
+      } else if (emailFilter === 'answer_not_sent') {
+        filtered = filtered.filter(q => q.email && q.email.trim() !== '' && q.answer_sent === false);
+      }
+    }
+    
     setFilteredQuestions(filtered);
-  }, [questions, searchQuery, statusFilter]);
+  }, [questions, searchQuery, statusFilter, emailFilter]);
 
   const handleMarkAsAdded = async (questionId: number) => {
     try {
@@ -91,6 +105,26 @@ export default function UnansweredQuestionsPage() {
     } catch (err) {
       console.error('Error marking question as added:', err);
       setError('Failed to update question status');
+    }
+  };
+
+  const handleMarkAnswerSent = async (questionId: number) => {
+    try {
+      const success = await markQuestionAnswerSent(questionId);
+      
+      if (success) {
+        // Update the local state
+        setQuestions(questions.map(q => 
+          q.id === questionId 
+            ? { ...q, answer_sent: true } 
+            : q
+        ));
+      } else {
+        setError('Failed to mark answer as sent');
+      }
+    } catch (err) {
+      console.error('Error marking answer as sent:', err);
+      setError('Failed to mark answer as sent');
     }
   };
 
@@ -113,6 +147,18 @@ export default function UnansweredQuestionsPage() {
     return isReasonable 
       ? <span className="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded text-xs border border-emerald-800">Reasonable</span>
       : <span className="bg-red-900/30 text-red-300 px-2 py-1 rounded text-xs border border-red-800">Not Reasonable</span>;
+  };
+
+  const getEmailBadge = (email: string | undefined, answerSent: boolean) => {
+    if (!email || email.trim() === '') {
+      return <span className="bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs border border-gray-700">No Email</span>;
+    }
+    
+    if (answerSent) {
+      return <span className="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded text-xs border border-emerald-800">Answer Sent</span>;
+    }
+    
+    return <span className="bg-blue-900/30 text-blue-300 px-2 py-1 rounded text-xs border border-blue-800">Email Provided</span>;
   };
 
   return (
@@ -152,7 +198,7 @@ export default function UnansweredQuestionsPage() {
               />
             </div>
             
-            <div className="flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-2">
               <select
                 className="block w-full pl-3 pr-10 py-2 text-base border border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-gray-700 text-gray-100"
                 value={statusFilter}
@@ -162,6 +208,18 @@ export default function UnansweredQuestionsPage() {
                 <option value="pending">Pending</option>
                 <option value="reviewed">Reviewed</option>
                 <option value="added_to_kb">Added to KB</option>
+              </select>
+              
+              <select
+                className="block w-full pl-3 pr-10 py-2 text-base border border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-gray-700 text-gray-100"
+                value={emailFilter}
+                onChange={(e) => setEmailFilter(e.target.value)}
+              >
+                <option value="all">All Email Status</option>
+                <option value="with_email">With Email</option>
+                <option value="without_email">Without Email</option>
+                <option value="answer_sent">Answer Sent</option>
+                <option value="answer_not_sent">Awaiting Response</option>
               </select>
             </div>
           </div>
@@ -186,7 +244,7 @@ export default function UnansweredQuestionsPage() {
                       Assessment
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Reason
+                      Email Status
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Status
@@ -204,12 +262,19 @@ export default function UnansweredQuestionsPage() {
                     <tr key={question.id} className="hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-normal">
                         <div className="text-sm font-medium text-gray-200">{question.processed_question}</div>
+                        {question.email && (
+                          <div className="text-xs text-gray-400 mt-1 flex items-center">
+                            <EnvelopeIcon className="h-3 w-3 mr-1" />
+                            {question.email}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getReasonableBadge(question.is_reasonable)}
+                        <div className="text-xs text-gray-400 mt-1 max-w-xs">{question.reason || '-'}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-normal">
-                        <div className="text-sm text-gray-400 max-w-xs">{question.reason || '-'}</div>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getEmailBadge(question.email, question.answer_sent)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(question.status)}
@@ -223,17 +288,27 @@ export default function UnansweredQuestionsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {question.status !== 'added_to_kb' ? (
-                          <button
-                            onClick={() => handleMarkAsAdded(question.id)}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-[#00015E] hover:bg-[#00017E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition ease-in-out duration-150"
-                          >
-                            <CheckCircleIcon className="h-4 w-4 mr-1" />
-                            Mark as Added
-                          </button>
-                        ) : (
-                          <span className="text-sm text-gray-400">Already added</span>
-                        )}
+                        <div className="flex flex-col gap-2">
+                          {question.status !== 'added_to_kb' && (
+                            <button
+                              onClick={() => handleMarkAsAdded(question.id)}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-[#00015E] hover:bg-[#00017E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition ease-in-out duration-150"
+                            >
+                              <CheckCircleIcon className="h-4 w-4 mr-1" />
+                              Mark as Added
+                            </button>
+                          )}
+                          
+                          {question.email && !question.answer_sent && (
+                            <button
+                              onClick={() => handleMarkAnswerSent(question.id)}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-emerald-800 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition ease-in-out duration-150"
+                            >
+                              <EnvelopeIcon className="h-4 w-4 mr-1" />
+                              Mark Answer Sent
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
