@@ -10,7 +10,7 @@ import { Stats } from '@/app/admin/context';
 
 
 
-export default function StatsCardExample({ stats }: { stats: Stats }) {
+export default function StatsCards({ stats }: { stats: Stats }) {
   const statsCards = [
     {
       title: "Total Questions",
@@ -45,11 +45,11 @@ export default function StatsCardExample({ stats }: { stats: Stats }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {statsCards.map((card, index) => (
-        <Card key={index} className="bg-slate-900 border border-gray-800">
+        <Card key={index} className="">
           <CardBody className="p-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm font-medium text-gray-400 mb-2">
+                <p className="text-sm font-medium  mb-2">
                   {card.title}
                 </p>
                 <p className={`text-3xl font-bold ${card.textColor}`}>

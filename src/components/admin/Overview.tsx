@@ -6,7 +6,7 @@ import RecentQuestions from '@/components/admin/RecentQuestions';
 import ErrorAlert from '@/components/admin/ErrorAlert';
 import LoadingSpinner from '@/components/admin/LoadingSpinner';
 import { AdminContext } from '../../app/admin/context';
-import StatsCardExample from './StatsCardExample';
+import StatsCards from './StatsCards';
 
 export const  OverviewPage = () =>  {
   const { stats, recentUnanswered, loading, error } = useContext(AdminContext);
@@ -22,7 +22,7 @@ export const  OverviewPage = () =>  {
   return (
     <div className="space-y-6">
       
-        <StatsCardExample stats={stats}   />
+        <StatsCards stats={stats}   />
         
       
 

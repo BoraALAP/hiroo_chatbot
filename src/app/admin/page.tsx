@@ -55,7 +55,7 @@ export default function AdminDashboard() {
         buttonLink="/admin/unanswered"
       />
       
-      <div className="mt-6 bg-gray-800 rounded-lg shadow-md border border-gray-700 overflow-hidden">
+      <div className=" bg-gray-800 rounded-lg  overflow-hidden">
         <div className="px-6 py-8 border-b border-gray-700">
           <Tabs 
             aria-label="Options"
