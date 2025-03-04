@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { 
   createQuestionReasonablenessChain, 
   getPendingQuestions, 
-  updateQuestionAssessment 
+  
 } from '../src/utils/unansweredQuestions';
 
 // Load environment variables
@@ -71,7 +71,7 @@ async function assessUnansweredQuestions() {
       
       // Update the question in the database
       console.log('Updating question assessment in database...');
-      const success = await updateQuestionAssessment(question.id, assessment);
+     
       
       if (success) {
         console.log(`Successfully updated assessment for question ID ${question.id}`);

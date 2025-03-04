@@ -2,6 +2,7 @@ import React from 'react';
 import { UnansweredQuestion } from '@/utils/unansweredQuestions';
 import QuestionStatusBadge from './QuestionStatusBadge';
 import { CheckCircleIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { Card, CardBody, Button, Divider, Chip } from "@heroui/react";
 
 interface QuestionListProps {
   questions: UnansweredQuestion[];
@@ -14,80 +15,87 @@ export default function QuestionList({
   onMarkAsAdded, 
   onMarkAnswerSent 
 }: QuestionListProps) {
-  const getReasonableBadge = (isReasonable: boolean | undefined) => {
-    if (isReasonable === undefined) return null;
-    
-    return isReasonable ? (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        Reasonable
-      </span>
-    ) : (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-        Not Reasonable
-      </span>
-    );
-  };
-  
-  const getEmailBadge = (email: string | undefined, answerSent: boolean) => {
-    if (!email) return null;
-    
-    return answerSent ? (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-        Email Sent
-      </span>
-    ) : (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-        {email}
-      </span>
-    );
-  };
-  
   return (
-    <div className="bg-gray-800 rounded-lg shadow-md border border-gray-700 overflow-hidden">
+    <div className="space-y-4">
       {questions.length === 0 ? (
-        <div className="p-6 text-center text-gray-400">
-          No questions found matching your criteria.
-        </div>
+        <Card>
+          <CardBody className="text-center py-8">
+            <p className="text-default-500">No questions found matching your criteria.</p>
+          </CardBody>
+        </Card>
       ) : (
-        <ul className="divide-y divide-gray-700">
-          {questions.map((question) => (
-            <li key={question.id} className="p-4">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                <div className="flex-1">
-                  <p className="font-medium text-gray-200 mb-2">{question.processed_question}</p>
-                  <div className="flex flex-wrap gap-2 mb-2">
+        questions.map((question) => (
+          <Card key={question.id} className="overflow-hidden">
+            <CardBody>
+              <div className="flex flex-col gap-2 p-6">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-lg font-medium">{question.processed_question}</h3>
+                  <div className="flex gap-2">
                     <QuestionStatusBadge status={question.status} />
-                    {getReasonableBadge(question.is_reasonable)}
-                    {getEmailBadge(question.email, question.answer_sent || false)}
+                    
                   </div>
-                  <p className="text-sm text-gray-400">
-                    {new Date(question.created_at).toLocaleString()}
-                  </p>
                 </div>
-                <div className="flex gap-2">
-                  {question.status !== 'added_to_kb' && (
-                    <button
-                      onClick={() => onMarkAsAdded(question.id)}
-                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                      <CheckCircleIcon className="h-4 w-4 mr-1" />
-                      Mark as Added
-                    </button>
-                  )}
-                  {question.email && !question.answer_sent && (
-                    <button
-                      onClick={() => onMarkAnswerSent(question.id)}
-                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
+                
+                <p className="text-default-600 text-sm">{question.reason || 'No additional context'}</p>
+                {question.email && (
+                  <p className="text-default-800 text-sm">
+                    <span className="flex items-center">
                       <EnvelopeIcon className="h-4 w-4 mr-1" />
-                      Mark Answer Sent
-                    </button>
-                  )}
+                      {question.email}
+                    </span>
+                  </p>
+                )}
+                
+                <Divider className="my-2" />
+                
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-1 items-center gap-2 justify-between">
+                    <span className="text-xs text-default-500">
+                      {new Date(question.created_at).toLocaleString()}
+                    </span>
+                    <div className="flex gap-2">
+                    {question.answer_sent && (
+                      <Chip color="success" variant="flat" size="sm">
+                        <span className="flex items-center">
+                          <EnvelopeIcon className="h-3 w-3 mr-1" />
+                          Email Sent
+                        </span>
+                      </Chip>
+                    )}
+                 
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {question.status !== 'added_to_kb' && (
+                      <Button
+                        size="sm"
+                        color="primary"
+                        variant="flat"
+                        startContent={<CheckCircleIcon className="h-4 w-4" />}
+                        onClick={() => onMarkAsAdded(question.id)}
+                      >
+                        Mark as Added
+                      </Button>
+                    )}
+                    
+                    {question.email && !question.answer_sent && (
+                      <Button
+                        size="sm"
+                        color="secondary"
+                        variant="flat"
+                        startContent={<EnvelopeIcon className="h-4 w-4" />}
+                        onClick={() => onMarkAnswerSent(question.id)}
+                      >
+                        Mark Answer Sent
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </li>
-          ))}
-        </ul>
+            </CardBody>
+          </Card>
+        ))
       )}
     </div>
   );

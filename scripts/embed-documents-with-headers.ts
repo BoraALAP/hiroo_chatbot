@@ -54,7 +54,6 @@ const embeddings = new OpenAIEmbeddings({
   openAIApiKey: openAIApiKey,
   modelName: process.env.NEXT_PUBLIC_EMBEDDINGS_MODEL || 'text-embedding-3-small',
   dimensions: 1536,
-  batchSize: 5,
   stripNewLines: true,
 });
 
@@ -227,13 +226,12 @@ async function processAndEmbedDocuments(documents: { filePath: string; content: 
                     await new Promise(resolve => setTimeout(resolve, backoffTime));
                   } else {
                     console.log(`Failed to process batch after ${maxRetries + 1} attempts. Processing documents individually...`);
-                    
                     // Process documents one by one with individual error handling
-                    for (const [index, singleDoc] of batch.entries()) {
+                    for (let index = 0; index < batch.length; index++) {
+                      const singleDoc = batch[index];
                       try {
                         // Add a small delay between individual document processing
                         await new Promise(resolve => setTimeout(resolve, 1000));
-                        
                         // Process with timeout for individual documents
                         await Promise.race([
                           SupabaseVectorStore.fromDocuments([singleDoc], embeddings, {

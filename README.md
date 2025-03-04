@@ -1,17 +1,24 @@
 # Hiroo Chatbot
 
-A Next.js-based chatbot application that uses OpenAI's GPT models and a Supabase vector database to provide relevant answers to user questions.
+A chatbot for Hiroo that answers questions about the platform using LangChain and OpenAI.
+
+## Features
+
+- Question simplification to enhance search accuracy
+- Knowledge base search using Supabase Vector Store
+- Product relevance checking to filter out irrelevant questions
+- Response generation based on knowledge base results
+- Email collection for unanswered questions
 
 ## Architecture
 
-The chatbot uses a functional agent-based architecture:
+The chatbot uses a simplified architecture with a single LangChain orchestrator that handles all operations:
 
-- **Orchestrator**: Coordinates the flow of conversation and delegates to specialized agents
-- **Question Simplifier**: Simplifies complex questions for better search results
-- **Knowledge Base Agent**: Searches the vector database for relevant information
-- **Product Relevance Agent**: Determines if a question is related to products
-- **Response Generator Agent**: Creates human-like responses based on available information
-- **Email Collection Agent**: Handles collection of user emails when needed
+1. **Question Simplification**: Simplifies user questions to enhance search accuracy
+2. **Knowledge Base Search**: Searches for relevant information in the Supabase Vector Store
+3. **Product Relevance Checking**: Determines if a question is reasonable and related to the product
+4. **Response Generation**: Generates responses based on knowledge base results
+5. **Email Collection**: Collects user emails for questions that can't be answered
 
 ## Setup
 
@@ -20,87 +27,92 @@ The chatbot uses a functional agent-based architecture:
    ```
    npm install
    ```
-3. Create a `.env.local` file with the following variables:
+3. Create a `.env` file with the following variables:
    ```
-   NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-4. Set up the database:
-   ```
-   npm run setup-db
-   ```
-5. Embed documents:
-   ```
-   npm run embed
+   OPENAI_API_KEY=your_openai_api_key
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_KEY=your_supabase_key
    ```
 
-## Development
+## Usage
 
-Run the development server:
+### Basic Usage
 
-```bash
-npm run dev
+```typescript
+import { createLangchainOrchestrator } from './src/agents/langchainOrchestrator';
+import { Message, createUserMessage } from './src/utils/chatMessageUtils';
+
+// Create the orchestrator
+const orchestrator = createLangchainOrchestrator();
+
+// Initialize the orchestrator
+await orchestrator.initialize(
+  process.env.OPENAI_API_KEY!,
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_KEY!
+);
+
+// Example conversation history
+const history: Message[] = [];
+
+// Process a user message
+const userMessage = 'What is Hiroo?';
+const userMessageObj = createUserMessage(userMessage);
+history.push(userMessageObj);
+
+const result = await orchestrator.processMessage(userMessage, history);
+history.push(result.response);
+
+console.log(result.response.content);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Handling Unanswered Questions
 
-## Testing
+The orchestrator will automatically handle unanswered questions by:
 
-### Manual Tests
+1. Checking if the question is reasonable and product-related
+2. If reasonable, adding it to the unanswered questions database
+3. Asking the user if they want to provide an email for follow-up
 
-You can test the chatbot functionality using the test scripts:
+```typescript
+// If waiting for email
+if (result.waitingForEmail && result.lastQuestionId) {
+  const emailInput = 'user@example.com';
+  const emailMessageObj = createUserMessage(emailInput);
+  history.push(emailMessageObj);
 
-```bash
-# Test general chat functionality
-npm run test-chat-questions
-
-# Test email collection functionality
-npm run test-email-collection
+  const emailResult = await orchestrator.processMessage(
+    emailInput,
+    history,
+    true,
+    result.lastQuestionId
+  );
+  
+  history.push(emailResult.response);
+  console.log(emailResult.response.content);
+}
 ```
 
-The email collection test verifies that:
-- Users can decline to provide their email
-- Users can continue the conversation after being asked for an email
-- The system properly handles valid email inputs
+## Example
 
-Example questions that should work:
-- "How can I create a career page?"
-- "How can I upgrade my membership?"
+See `src/examples/langchainExample.ts` for a complete example of how to use the orchestrator.
 
-## Admin Tools
+To run the example:
 
-### Unanswered Questions
+```
+npx ts-node src/examples/langchainExample.ts
+```
 
-The system can track questions that couldn't be answered well:
+## Templates
 
-1. Set up the unanswered questions table:
-   ```
-   npm run setup-unanswered
-   ```
+The chatbot uses the following templates for LLM prompts:
 
-2. Add a test unanswered question:
-   ```
-   npm run test-add-unanswered
-   ```
+- **Question Simplification**: Simplifies user questions to enhance search accuracy
+- **Product Relevance**: Determines if a question is reasonable and related to the product
+- **Response Generation**: Generates responses based on knowledge base results
 
-3. Assess unanswered questions for reasonableness:
-   ```
-   npm run assess-questions
-   ```
+These templates are defined in `src/agents/templates.ts` and can be customized as needed.
 
-### Document Management
+## License
 
-1. Check for duplicate documents:
-   ```
-   npm run check-duplicates
-   ```
-
-2. Remove duplicate documents:
-   ```
-   npm run remove-duplicates
-   ```
-
-## Deployment
-
-The application can be deployed to Vercel or any other Next.js-compatible hosting service.
+MIT

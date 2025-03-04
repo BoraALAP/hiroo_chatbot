@@ -10,7 +10,7 @@ interface RecentQuestionsProps {
 
 export default function RecentQuestions({ questions }: RecentQuestionsProps) {
   return (
-    <Card className="bg-gray-800 border border-gray-700">
+    <Card className="">
       <CardHeader className="flex justify-between items-center px-6 py-4">
         <h2 className="text-lg font-semibold text-white">Recent Unanswered Questions</h2>
         <Link 

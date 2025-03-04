@@ -55,8 +55,8 @@ export default function AdminDashboard() {
         buttonLink="/admin/unanswered"
       />
       
-      <div className=" bg-gray-800 rounded-lg  overflow-hidden">
-        <div className="px-6 py-8 border-b border-gray-700">
+      <div className="flex flex-col p-6 gap-6 bg-default-200 rounded-2xl  overflow-hidden">
+        
           <Tabs 
             aria-label="Options"
           >
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
               <AnalyticsPage />
             </Tab>
           </Tabs>
-        </div>
+        
         
         
         

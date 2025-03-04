@@ -176,8 +176,7 @@ export async function markQuestionAnswerSent(
 export async function addUnansweredQuestion(
   question: string,
   processedQuestion?: string,
-  userId?: string,
-  email?: string
+  userId?: string
 ): Promise<number | null> {
   try {
     // Initialize Supabase client
@@ -200,7 +199,6 @@ export async function addUnansweredQuestion(
           processed_question: processedQuestion,
           user_id: userId,
           status: 'pending',
-          email,
           answer_sent: false
         }
       ])
@@ -220,47 +218,6 @@ export async function addUnansweredQuestion(
   } catch (error) {
     console.error('Error in addUnansweredQuestion:', error);
     return null;
-  }
-}
-
-/**
- * Updates the assessment for an unanswered question
- */
-export async function updateQuestionAssessment(
-  questionId: number,
-  assessment: ReasonablenessAssessment
-): Promise<boolean> {
-  try {
-    // Initialize Supabase client
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-    
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('Missing Supabase environment variables');
-      return false;
-    }
-    
-    const supabaseClient = createClient(supabaseUrl, supabaseKey);
-    
-    // Update the question assessment
-    const { error } = await supabaseClient
-      .from('unanswered_questions')
-      .update({
-        is_reasonable: assessment.isReasonable,
-        reason: assessment.reason,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', questionId);
-    
-    if (error) {
-      console.error('Error updating question assessment:', error);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error in updateQuestionAssessment:', error);
-    return false;
   }
 }
 

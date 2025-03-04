@@ -1,9 +1,26 @@
+import { Document } from '@langchain/core/documents';
+
 // Define message types
 export type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
 };
+
+
+export const formatHistoryForLLM = (history: Message[]): string => {
+  if (history.length === 0) return "No previous conversation.";
+  
+  return history
+    .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+    .join('\n\n');
+};
+
+ // Define the function to combine documents
+export const combineDocs = (docs: Document[]): string => {
+  return docs.map((doc) => doc.pageContent).join('\n\n');
+};
+
 
 
 /**
@@ -27,3 +44,4 @@ export const createAssistantMessage = (content: string): Message => {
     content,
   };
 }; 
+

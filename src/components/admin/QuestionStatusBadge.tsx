@@ -1,4 +1,5 @@
 import React from 'react';
+import { Chip } from "@heroui/react";
 
 interface QuestionStatusBadgeProps {
   status: string;
@@ -8,27 +9,27 @@ export default function QuestionStatusBadge({ status }: QuestionStatusBadgeProps
   switch (status) {
     case 'pending':
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+        <Chip color="warning" variant="flat" size="sm">
           Pending
-        </span>
+        </Chip>
       );
     case 'added_to_kb':
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        <Chip color="success" variant="flat" size="sm">
           Added to KB
-        </span>
+        </Chip>
       );
     case 'answer_sent':
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        <Chip color="primary" variant="flat" size="sm">
           Answer Sent
-        </span>
+        </Chip>
       );
     default:
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+        <Chip color="default" variant="flat" size="sm">
           {status}
-        </span>
+        </Chip>
       );
   }
 } 
