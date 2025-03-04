@@ -2,7 +2,8 @@ import React from 'react';
 import { UnansweredQuestion } from '@/utils/unansweredQuestions';
 import QuestionStatusBadge from './QuestionStatusBadge';
 import { CheckCircleIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
-import { Card, CardBody, Button, Divider, Chip } from "@heroui/react";
+import { Card, CardBody,  Divider, Chip } from "@heroui/react";
+import { MyButton } from '../ui/button';
 
 interface QuestionListProps {
   questions: UnansweredQuestion[];
@@ -25,7 +26,7 @@ export default function QuestionList({
         </Card>
       ) : (
         questions.map((question) => (
-          <Card key={question.id} className="overflow-hidden">
+          <Card key={question.id} className="overflow-hidden bg-zinc-900">
             <CardBody>
               <div className="flex flex-col gap-2 p-6">
                 <div className="flex justify-between items-start">
@@ -68,27 +69,27 @@ export default function QuestionList({
                   
                   <div className="flex gap-2">
                     {question.status !== 'added_to_kb' && (
-                      <Button
+                      <MyButton
                         size="sm"
-                        color="primary"
-                        variant="flat"
+                        color="primaryCustom"
+                        variant="shadow"
                         startContent={<CheckCircleIcon className="h-4 w-4" />}
                         onClick={() => onMarkAsAdded(question.id)}
                       >
                         Mark as Added
-                      </Button>
+                      </MyButton>
                     )}
                     
                     {question.email && !question.answer_sent && (
-                      <Button
+                      <MyButton
                         size="sm"
-                        color="secondary"
+                        
                         variant="flat"
                         startContent={<EnvelopeIcon className="h-4 w-4" />}
                         onClick={() => onMarkAnswerSent(question.id)}
                       >
                         Mark Answer Sent
-                      </Button>
+                      </MyButton>
                     )}
                   </div>
                 </div>

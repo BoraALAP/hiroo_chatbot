@@ -1,7 +1,13 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 
-const questionSimplificationTemplate = `Simplify this question to make it clearer and more direct, focusing on the core information need.
+const questionSimplificationTemplate = `Simplify this question to make it clearer and more direct, focusing on the core information need. 
+
 Remove unnecessary details but preserve the essential meaning.
+
+Also check if the question is related to Hiroo.
+
+ABOUT HIROO:
+Hiroo is a Saas product that helps companies with their HR needs. Hiring, Applicant Tracking, Employee Management, etc.
 
 Original question: {question}
 
@@ -32,9 +38,6 @@ Formatting Instructions:
 {formattingInstructions}
 `
 
-
-
-
 export const productRelevancePrompt = PromptTemplate.fromTemplate(productRelevanceTemplate);
 
 
@@ -53,10 +56,9 @@ CONVERSATION HISTORY:
 
 Please provide a helpful, accurate, and concise response based on the relevant information provided. If the information doesn't fully answer the question, acknowledge what you know and what you don't.`;
 
-
-
-
 export const responsePrompt = PromptTemplate.fromTemplate(responseGenerationTemplate);
+
+
 
 /**
  * Template for extracting email addresses from user messages
