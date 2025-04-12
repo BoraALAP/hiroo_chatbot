@@ -1,6 +1,70 @@
 # Hiroo Chatbot
 
-A chatbot for Hiroo that answers questions about the platform using LangChain and OpenAI.
+A custom AI chatbot built with Next.js, LangChain, OpenAI, and Supabase for the Hiroo platform.
+
+## Architecture
+
+The chatbot uses a streamlined architecture built on LangChain's components:
+
+### Core Components
+
+1. **Chatbot Orchestrator (`src/utils/chatbotOrchestrator.ts`)**
+   - Central orchestrator that processes user questions
+   - Handles question simplification, relevance checking, and response generation
+   - Interacts with Supabase Vector Store for knowledge retrieval
+
+2. **Chat Component (`src/components/Chat.tsx`)**
+   - React component that provides the chat interface
+   - Manages conversation state and history
+   - Collects emails for unanswered questions
+
+3. **Support Functions (`src/utils/supportFunctions.ts`)**
+   - Helper functions for message formatting
+   - Document handling utilities
+
+### Flow
+
+1. User submits a question
+2. Question is simplified to improve search accuracy
+3. System checks if the question is relevant to Hiroo
+4. Knowledge base is searched for relevant information
+5. Response is generated based on the search results
+6. If no relevant information is found, the system offers to collect the user's email for follow-up
+
+## Development
+
+### Setup
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables in `.env.local`:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_key
+   OPENAI_API_KEY=your_openai_key
+   ```
+4. Run the development server: `npm run dev`
+
+### Adding to the Knowledge Base
+
+To add documents to the knowledge base:
+
+1. Format your documents appropriately
+2. Use the Supabase admin tools to upload to the vector store
+3. Ensure metadata is correctly structured
+
+### Customization
+
+- Modify prompt templates in `chatbotOrchestrator.ts` to change AI behavior
+- Adjust model parameters for different response characteristics
+- Customize the UI components as needed
+
+## Future Improvements
+
+- Implement authentication flows
+- Add additional search capabilities
+- Enhance email collection and ticketing system
+- Implement analytics for question tracking
 
 ## Features
 
@@ -9,16 +73,6 @@ A chatbot for Hiroo that answers questions about the platform using LangChain an
 - Product relevance checking to filter out irrelevant questions
 - Response generation based on knowledge base results
 - Email collection for unanswered questions
-
-## Architecture
-
-The chatbot uses a simplified architecture with a single LangChain orchestrator that handles all operations:
-
-1. **Question Simplification**: Simplifies user questions to enhance search accuracy
-2. **Knowledge Base Search**: Searches for relevant information in the Supabase Vector Store
-3. **Product Relevance Checking**: Determines if a question is reasonable and related to the product
-4. **Response Generation**: Generates responses based on knowledge base results
-5. **Email Collection**: Collects user emails for questions that can't be answered
 
 ## Setup
 

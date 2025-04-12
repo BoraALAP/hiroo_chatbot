@@ -1,5 +1,6 @@
 
 
+
 import { AdminProvider } from './context';
 
 export default function AdminLayout({
@@ -14,7 +15,7 @@ export default function AdminLayout({
           <main className="flex-grow">
             {children}
           </main>
-      
+         
       </div>
     </AdminProvider>
   );

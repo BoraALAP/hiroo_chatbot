@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
-interface MessageType {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-}
+
 
 interface ChatMessageProps {
-  message: MessageType;
+  message: {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+  };
 }
 
 export default function ChatMessage({ message }: ChatMessageProps) {
@@ -40,6 +40,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                 ol: (props) => <ol className="list-decimal" {...props} />,
                 li: (props) => <li className="marker:text-blue-500" {...props} />,
                 p: (props) => <p className="mb-2 font-medium last:mb-0" {...props} />,
+                a: (props) => <a className="text-blue-500 hover:underline" {...props} />,
+                img: (props) => <img className="max-w-full h-auto" {...props} />,
+                video: (props) => <video className="max-w-full h-auto" {...props} />,
               }}
             >
               {message.content}

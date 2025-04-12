@@ -13,7 +13,7 @@ dotenv.config({ path: '.env.local' });
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const openAIApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY || '';
+const openAIApiKey = process.env.OPENAI_API_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables');
@@ -110,47 +110,85 @@ async function processAndEmbedDocuments(documents: { filePath: string; content: 
     for (const doc of documents) {
       console.log(`Processing document: ${path.basename(doc.filePath)}`);
       
-      // Choose the appropriate splitter based on file type
+      // Extract filename without extension to use as a topic identifier
+      const filename = path.basename(doc.filePath, path.extname(doc.filePath));
+      const topicName = filename.replace(/-/g, ' ').trim();
+      
+      // Keep the entire document contents together for small documents
+      // This preserves context better than aggressive chunking
       let docs: Document[];
-      if (doc.filePath.endsWith('.md')) {
-        // Use LangChain's RecursiveCharacterTextSplitter with markdown settings
+      
+      if (doc.content.length < 2000) {
+        // For small documents, keep as a single chunk with enhanced metadata
+        docs = [
+          new Document({
+            pageContent: doc.content,
+            metadata: { 
+              source: path.basename(doc.filePath),
+              topic: topicName,
+              document_type: 'full_document'
+            }
+          })
+        ];
+      } else if (doc.filePath.endsWith('.md')) {
+        // For larger markdown documents, use more appropriate chunking
         const markdownSplitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
-          chunkSize: 500,
-          chunkOverlap: 50,
+          chunkSize: 1000,    // Larger chunks to preserve more context
+          chunkOverlap: 200,  // More overlap between chunks
         });
+        
+        // Extract the document title from the first heading
+        const titleMatch = doc.content.match(/^# (.+)$/m);
+        const documentTitle = titleMatch ? titleMatch[1].trim() : topicName;
         
         // Split the markdown document
         docs = await markdownSplitter.createDocuments(
           [doc.content],
-          [{ source: path.basename(doc.filePath) }]
+          [{ 
+            source: path.basename(doc.filePath),
+            topic: topicName,
+            title: documentTitle
+          }]
         );
         
-        // Extract header information from each chunk and add to metadata
-        docs = docs.map(d => {
-          // Try to extract header information from the chunk
-          const headerMatch = d.pageContent.match(/^(#{1,6})\s+(.+)$/m);
+        // Process each chunk to improve metadata
+        docs = docs.map((d, index) => {
           const metadata = { ...d.metadata };
           
+          // Try to extract header information from the chunk
+          const headerMatch = d.pageContent.match(/^(#{1,6})\s+(.+)$/m);
           if (headerMatch) {
             const headerLevel = headerMatch[1].length;
             const headerText = headerMatch[2].trim();
             metadata[`header_level_${headerLevel}`] = headerText;
+            
+            // Add the header to the pageContent to help with retrieval
+            if (index === 0 && !d.pageContent.startsWith("# ")) {
+              d.pageContent = `# ${documentTitle}\n\n${d.pageContent}`;
+            }
+          } else if (index === 0) {
+            // Ensure the first chunk has the title
+            d.pageContent = `# ${documentTitle}\n\n${d.pageContent}`;
           }
           
+          metadata.chunk_index = index;
           return new Document({
             pageContent: d.pageContent,
             metadata: metadata,
           });
         });
       } else {
-        // Use regular text splitter for other files
+        // For non-markdown documents, use standard chunking
         const textSplitter = new RecursiveCharacterTextSplitter({
-          chunkSize: 1000,
+          chunkSize: 1500,
           chunkOverlap: 200,
         });
         docs = await textSplitter.createDocuments(
           [doc.content], 
-          [{ source: path.basename(doc.filePath) }]
+          [{ 
+            source: path.basename(doc.filePath),
+            topic: topicName
+          }]
         );
       }
       
